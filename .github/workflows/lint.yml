@@ -4,6 +4,6 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - run: cd /home/runner/work/zenn
+      - run: cd /home/runner/work
       - run: npm install
       - run: npx textlint ./zenn/*/*.md
