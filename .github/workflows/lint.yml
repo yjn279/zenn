@@ -1,8 +1,9 @@
-name: actions
+name: lint
 on: push
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
+      - run: cd /home/runner/work/zenn
       - run: npm install
       - run: npx textlint ./zenn/*/*.md
