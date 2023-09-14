@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "textlint": "^13.3.2",
+    "textlint-rule-preset-ja-spacing": "^2.3.0",
     "zenn-cli": "^0.1.143"
   }
 }
