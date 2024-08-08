@@ -7,7 +7,7 @@ Zennのコンテンツを管理するGitHubリポジトリ。
 ### Create
 
 ```shell
-npx zenn new:article
+npx zenn new:article  --slug 
 ```
 
 ### Preview
