@@ -1,31 +1,28 @@
 ---
-title: "CI統合Claude Code GitHub Actionsで堅牢なコード開発環境を構築する"
-emoji: "🤖"
+title: "CIによる堅牢なClaude Code GitHub Actions開発"
+emoji: "🛌"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics:
   - "github"
-  - "githubactions"
-  - "ci"
   - "claude"
-  - "biome"
 published: true
-published_at: "2024-12-27 08:00"
+published_at: "2025-06-02 09:00"
 publication_name: "activecore"
 ---
 
 ## はじめに
 
-こんにちは。最近ベッドの上からでも開発したいと思い始めたwinnieです 🛏️
+最近Claude Code GitHub Actionsを触り始め、その便利さに感動しています。
 
-Claude Code GitHub Actionsを利用してAIと協力しながら開発を進める機会が増えてきましたが、特にスマホからClaudeを呼び出してそのままマージする場合、CIによる品質保証が重要になってきます。PCでの開発なら手元でLintやテストを実行してから推進できますが、スマホでの開発ではそうもいきません。
+Claude 4の性能も相まって、これでスマホからも開発できるぞと思ったのですが、エンジニアである以上はやはりコードの品質が気になるところ。そこでベッドに寝転びながらスマホ片手に開発する生活を手に入れるべく、CIによる最低限の品質が担保されたClaude Code GitHub Actionsによる開発フローを構築してみました！
 
-この記事では、Claude Code GitHub ActionsにCI（Continuous Integration）を統合し、堅牢なコード開発環境を構築する方法について解説します。
+この記事では、Claude Code GitHub ActionsにCIを導入し、堅牢な開発フローを構築する方法について解説します。
 
 ## 結論
 
-以下のWorkflowを利用することで、Claude Codeによるコード生成時に自動的にCIチェックを実行し、品質を保証できます。
+こちらのWorkflowを設定することで、CIを通過したClaudeのコードが生成されます。
 
-```yml
+```yml: .github/workflows/claude.yml
 name: Claude Code
 
 on:
@@ -57,166 +54,82 @@ jobs:
         with:
           fetch-depth: 1
 
+      # 利用するCIツールに応じたセットアップ
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
-        with:
-          version: latest
 
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          allowed_tools: "Bash(biome ci .)"
+          allowed_tools: "Bash(biome ci .)"  # 利用するCIツールに応じた実行コマンド
           assignee_trigger: "claude"
-  
-  quality:
-    needs: claude
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Biome
-        uses: biomejs/setup-biome@v2
-        with:
-          version: latest
-
-      - name: Run Biome
-        run: biome ci .
 ```
 
-## 前提条件
+さらに、Issueテンプレートを作成してClaude Codeを簡単に呼び出せるようにしておきます。
 
-この記事では以下の環境を前提としています：
+```markdown: .github/ISSUE_TEMPLATE/feature-request.md
+---
+name: Feature request
+about: Use this template for tracking new features.
+title: "feat: [FEATURE NAME]"
+labels: enhancement
+assignees: ''
+---
+@claude
 
-- **ReactによるWebフロントエンド開発**
-- **CIツールとしてBiomeを利用**（ESLint + Prettierなど他のツールでも同様の方法で適用可能）
-- Claude Code GitHub Actionsの基本的な導入は完了済み
-- Biome等のLintツールの導入も完了済み
+## 概要
+
+## 注意事項
+
+- `biome ci .` を実行し、エラーが出ない状態にして実装完了とすること。
+
+```
 
 :::message
-Claude Code GitHub Actionsの導入方法やBiomeの基本的な設定については、本記事では解説しません。それぞれの公式ドキュメントを参照してください。
+上記のWorkflowは、JavaScriptを利用したWeb開発での、Biome[^1]の使用を想定しています。
+本記事の想定読者はこれに限りませんが、コメント部分は適宜変更してください。
 :::
 
-## 検討したアプローチ
+## 解説
 
-最初から上記の解決方法に辿り着いたわけではありません。いくつかのアプローチを検討した結果、現在の形に落ち着きました。
+正直、解説することはあまりないのですが、一応説明していきます。
 
-### アプローチ1: Claude Code内でLintチェックを実行
-
-最初に考えたのは、GitHub Issue内でClaudeにLintチェックも依頼する方法でした。
+例として、Issueの作成時に `@claude` メンションをするケースで考えてみましょう。以下のように、単にCIコマンドを実行するよう記載しただけでは、CIは実行できません。
 
 ```markdown
-@claude ログイン機能を実装してください。また、biome ci . を実行してLintエラーがないことも確認してください。
+@claude
+
+ログイン機能を実装してください。
+実装が完了したら、 `biome check --write .` を実行すること。
 ```
 
-しかし、デフォルトではClaude CodeでBashコマンドを実行する権限がないため、この方法は利用できませんでした。
+実は、GitHubリポジトリにはBashコマンドを実行できない旨が記載されています（ドキュメントしか見ておらず見落としていた…）。また、コマンドを実行したい場合には、toolとしての明示的なコマンドの許可が必要な旨も記載されています。
 
-### アプローチ2: Workflowの結果をClaude Codeに参照させる
-
-次に、Claude Codeとは別にLintチェック用のWorkflowを実行し、その結果をClaude Codeに参照させる方法を検討しました。
-
-しかし、Claude Code GitHub Actionsの仕様上、他のWorkflowの実行結果を直接参照する機能はないため、この方法も断念しました。
-
-### アプローチ3: Lintの結果をコメントで通知
-
-Lintの結果をIssueコメントとして投稿し、それを元にClaudeが再度修正を行う方法も考えましたが、これは解決前に別の方法が見つかったため実装には至りませんでした。
-
-## 解決方法
-
-最終的に、Claude Code GitHub Actionsの公式ドキュメントを詳しく読み直したところ、`allowed_tools`パラメータでBashコマンドの実行権限を付与できることが分かりました[^1]。
-
-### キーポイント: allowed_toolsパラメータ
+> Claude does not have access to execute arbitrary Bash commands by default. If you want Claude to run specific commands (e.g., npm install, npm test), you must explicitly allow them using the allowed_tools configuration:[^2]
 
 ```yml
-- name: Run Claude Code
-  uses: anthropics/claude-code-action@beta
+- uses: anthropics/claude-code-action@beta
   with:
-    anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-    allowed_tools: "Bash(biome ci .)"  # ここがポイント！
+    allowed_tools: "Bash(npm install),Bash(npm run test),Edit,Replace,NotebookEditCell"
+    disallowed_tools: "TaskOutput,KillTask"
+    # ... other inputs
 ```
 
-`allowed_tools`パラメータに`"Bash(biome ci .)"`を指定することで、Claude CodeがBiomeによるLintチェックを実行できるようになります。
+という訳で、Claude Code GitHub Actionsによる堅牢なコードを手に入れる第一歩としては、Actionをセットアップした際のWorkflowに `allowed_tools` を追加すればOKです。そのほか、必要に応じて事前にCIツールのセットアップなどをしてあげます。
 
-### Workflowの構成
+CIの実行コマンドを許可したら、あとはそのコマンドを使うようClaudeに指示するだけです。Issueの作成時に都度指示しても良いのですが、 ~~面倒なので~~ 開発フローと謳っているからにはもうひと手間加えましょう。
 
-Workflowは2つのジョブで構成されています：
-
-1. **`claude`ジョブ**: Claude Codeを実行し、Biomeチェックの権限も付与
-2. **`quality`ジョブ**: 念のためClaude実行後に再度Biomeチェックを実行
-
-```yml
-quality:
-  needs: claude  # claudeジョブの完了を待つ
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Setup Biome
-      uses: biomejs/setup-biome@v2
-      with:
-        version: latest
-
-    - name: Run Biome
-      run: biome ci .
-```
-
-この二重チェック体制により、Claude Codeが生成したコードの品質を確実に保証できます。
-
-## 実際の使用例
-
-このWorkflowを導入後、以下のようにスマホからClaudeに依頼できるようになりました：
-
-```markdown
-@claude 
-ユーザープロフィール画面のコンポーネントを作成してください。
-以下の要件を満たしてください：
-
-- TypeScriptで実装
-- アバター画像の表示機能
-- プロフィール編集フォーム
-- レスポンシブデザイン対応
-
-実装後は biome ci . でLintチェックも実行してください。
-```
-
-Claude Codeは以下の流れで動作します：
-
-1. 要件に基づいてコンポーネントを実装
-2. `biome ci .`を実行してLintエラーをチェック
-3. エラーがあれば自動的に修正
-4. 最終的にLintチェックをパスしたコードをコミット
-
-## 応用例: テストの統合
-
-Biome以外のツールでも同様のアプローチが可能です。例えば、テストツールを統合する場合：
-
-```yml
-allowed_tools: "Bash(npm test),Bash(biome ci .)"
-```
-
-複数のコマンドをカンマ区切りで指定することで、Lintチェックとテスト実行の両方をClaude Codeに実行させることができます。
-
-## セキュリティ上の注意点
-
-`allowed_tools`パラメータでBashコマンドの実行権限を付与する際は、セキュリティに注意が必要です：
-
-- **必要最小限のコマンドのみを許可**：`Bash(biome ci .)`のように具体的なコマンドを指定
-- **任意のBashコマンド実行は避ける**：`Bash`だけの指定は危険
-- **信頼できるリポジトリでのみ使用**：プライベートリポジトリでの使用を推奨
+ということで、Claudeのメンション＆CIコマンドを実行する旨をあらかじめ記載したIssueテンプレートを作成しておきます。こうすることで、Issueの作成時にタイトルとタスクさえ記載すれば、CIを通過した堅牢なコードが生成されるようになりますね。
 
 ## おわりに
 
-Claude Code GitHub ActionsにCIを統合することで、スマホからでも安心してAIと協力しながら開発を進められるようになりました 📱
+だいぶ初歩的な内容ですが、地味にリポジトリの内容を見落としていたので文章にしてみました。
 
-特に我々の開発環境では、Cloudflareでプルリクエストごとにプレビューデプロイされるため、CIによるコード品質保証さえできれば、機能の検証自体はデプロイされたプレビュー環境でスマホから確認できます。
+今回はサンプルとしてBiomeのみを利用しましたが、テスト含めほかのCIツールも同様の方法で適用可能です。また今回の記事には含めていませんが、ClaudeのPull Requestなりを発火点としてデプロイされる状態にしておくことで、（Web開発であれば）スマホでのCI/CD開発が実現できます。
 
-これで念願のベッドの上での開発が現実的になりました！🛏️✨
+これで、布団から出られないときでも寝ながら開発ができますね！
 
-もちろん、重要な機能開発や複雑なリファクタリングはPCでしっかりと行いますが、簡単な機能追加やバグ修正であれば、この環境で十分対応可能です。
-
-皆さんもぜひ、Claude Code GitHub ActionsとCIを組み合わせて、より柔軟で堅牢な開発環境を構築してみてください！
-
-[^1]: [Advanced Configuration - Claude Code GitHub Actions](https://github.com/anthropics/claude-code-action?tab=readme-ov-file#advanced-configuration)
+[^1]: [Biome、Webのためのツールチェーン](https://biomejs.dev/ja/)
+[^2]: [Custom Tools | anthropics/claude-code-action](https://github.com/anthropics/claude-code-action?tab=readme-ov-file#custom-tools)
