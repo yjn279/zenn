@@ -1,5 +1,9 @@
 {
   "dependencies": {
-    "zenn-cli": "^0.1.161"
+    "zenn-cli": "^0.1.162"
+  },
+  "volta": {
+    "node": "22.17.1",
+    "pnpm": "10.13.1"
   }
 }
