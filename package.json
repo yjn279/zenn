@@ -1,9 +1,21 @@
 {
   "dependencies": {
-    "zenn-cli": "^0.1.162"
+    "@ai-sdk/openai": "^1.3.23",
+    "@mastra/core": "^0.11.1",
+    "@mastra/libsql": "^0.11.2",
+    "@mastra/loggers": "^0.10.4",
+    "@mastra/memory": "^0.11.5",
+    "zenn-cli": "^0.1.162",
+    "zod": "^3.25.76"
   },
   "volta": {
     "node": "22.17.1",
     "pnpm": "10.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "mastra": "^0.10.15",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }
