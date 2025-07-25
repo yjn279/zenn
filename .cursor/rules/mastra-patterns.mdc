@@ -1,0 +1,82 @@
+# Mastra Framework Development Patterns
+
+## Agent Development
+When creating agents, follow the pattern in [weather-agent.ts](mdc:src/mastra/agents/weather-agent.ts):
+
+```typescript
+import { openai } from '@ai-sdk/openai';
+import { Agent } from '@mastra/core/agent';
+import { Memory } from '@mastra/memory';
+
+export const agentName = new Agent({
+  name: 'Agent Name',
+  instructions: `Clear, specific instructions...`,
+  model: openai('gpt-4o-mini'), // or appropriate model
+  tools: { toolName },
+  memory: new Memory({
+    storage: new LibSQLStore({
+      url: 'file:../mastra.db',
+    }),
+  }),
+});
+```
+
+## Tool Development
+Follow the pattern in [weather-tool.ts](mdc:src/mastra/tools/weather-tool.ts):
+
+```typescript
+import { createTool } from '@mastra/core/tools';
+import { z } from 'zod';
+
+export const toolName = createTool({
+  id: 'tool-id',
+  description: 'Clear description',
+  inputSchema: z.object({
+    param: z.string().describe('Parameter description'),
+  }),
+  outputSchema: z.object({
+    result: z.string(),
+  }),
+  execute: async ({ context }) => {
+    // Implementation
+  },
+});
+```
+
+## Workflow Development
+Follow the pattern in [weather-workflow.ts](mdc:src/mastra/workflows/weather-workflow.ts):
+
+```typescript
+import { createStep, createWorkflow } from '@mastra/core/workflows';
+
+const stepName = createStep({
+  id: 'step-id',
+  description: 'Step description',
+  inputSchema: z.object({...}),
+  outputSchema: z.object({...}),
+  execute: async ({ inputData, mastra }) => {
+    // Implementation
+  },
+});
+
+const workflowName = createWorkflow({
+  id: 'workflow-id',
+  inputSchema: z.object({...}),
+  outputSchema: z.object({...}),
+})
+  .then(stepName)
+  // chain additional steps
+
+workflowName.commit();
+```
+
+## Registration
+Always register new components in [index.ts](mdc:src/mastra/index.ts):
+
+```typescript
+export const mastra = new Mastra({
+  workflows: { workflowName },
+  agents: { agentName },
+  // ... other config
+});
+```

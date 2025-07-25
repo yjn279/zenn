@@ -1,0 +1,28 @@
+# TypeScript Standards
+
+## Module System
+- Use ES2022 modules as configured in [tsconfig.json](mdc:tsconfig.json)
+- Always use `import`/`export` syntax
+- No `require()` statements
+
+## Code Style
+- Use strict TypeScript settings (as configured)
+- Always define proper interfaces for API responses
+- Use Zod schemas for validation and type inference
+- Prefer `const` over `let` when possible
+- Use descriptive variable and function names
+
+## Error Handling
+- Throw descriptive Error objects with meaningful messages
+- Use try/catch for async operations that might fail
+- Validate inputs using Zod schemas
+
+## Dependencies
+- Import from specific subpaths when available (e.g., `@mastra/core/agent`)
+- Use the OpenAI client from `@ai-sdk/openai`
+- Leverage Zod for all schema definitions
+
+## Async/Await
+- Always use async/await for Promise handling
+- Avoid Promise chains in favor of async/await syntax
+- Handle errors appropriately in async functions

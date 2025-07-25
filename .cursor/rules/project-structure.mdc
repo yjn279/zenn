@@ -1,0 +1,26 @@
+# Project Structure Guide
+
+This is a Zenn tech blog project with Mastra AI framework integration.
+
+## Core Structure
+- **articles/**: Zenn markdown articles for publication
+- **books/**: Zenn book content
+- **images/**: Article images and assets
+- **src/mastra/**: Mastra AI framework implementation
+  - **agents/**: AI agents (e.g., [weather-agent.ts](mdc:src/mastra/agents/weather-agent.ts))
+  - **tools/**: Reusable tools (e.g., [weather-tool.ts](mdc:src/mastra/tools/weather-tool.ts))
+  - **workflows/**: Multi-step workflows (e.g., [weather-workflow.ts](mdc:src/mastra/workflows/weather-workflow.ts))
+  - **index.ts**: Main Mastra configuration and entry point
+
+## Package Management
+- Uses **pnpm** as package manager
+- Node.js version managed by Volta (22.17.1)
+- TypeScript with ES2022 modules
+
+## Key Dependencies
+- `@mastra/core`: Core Mastra framework
+- `@ai-sdk/openai`: OpenAI integration
+- `zenn-cli`: Zenn publishing tools
+- `zod`: Schema validation
+
+The main Mastra instance is configured in [src/mastra/index.ts](mdc:src/mastra/index.ts) with storage, logging, and component registration.

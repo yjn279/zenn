@@ -1,0 +1,49 @@
+# API Integration Patterns
+
+## External API Calls
+Follow the pattern established in [weather-tool.ts](mdc:src/mastra/tools/weather-tool.ts) and [weather-workflow.ts](mdc:src/mastra/workflows/weather-workflow.ts):
+
+```typescript
+// Always define response interfaces
+interface ApiResponse {
+  // Define expected structure
+}
+
+// Handle API calls with proper error handling
+const response = await fetch(url);
+if (!response.ok) {
+  throw new Error(`API request failed: ${response.statusText}`);
+}
+const data = (await response.json()) as ApiResponse;
+
+// Validate response structure
+if (!data.results?.[0]) {
+  throw new Error(`Unexpected response structure`);
+}
+```
+
+## Error Handling
+- Always check for API response errors
+- Provide meaningful error messages that include context
+- Use type assertion with proper interfaces for API responses
+- Handle edge cases (empty results, malformed data)
+
+## URL Construction
+- Use `encodeURIComponent()` for query parameters
+- Build URLs programmatically to avoid encoding issues
+- Store base URLs as constants when reused
+
+## Data Transformation
+- Transform API responses to match your schema immediately
+- Use consistent naming conventions for transformed data
+- Include units and context in response objects
+
+## Rate Limiting & Caching
+- Consider implementing rate limiting for production APIs
+- Cache responses when appropriate
+- Use environment variables for API keys and base URLs
+
+## Testing API Integration
+- Mock external APIs in tests
+- Test error conditions (network failures, invalid responses)
+- Validate schema compliance of API responses

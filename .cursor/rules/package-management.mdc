@@ -1,0 +1,25 @@
+# Package Management
+
+## Package Manager
+- Use **pnpm** exclusively (configured in [package.json](mdc:package.json) via Volta)
+- Never use `npm` or `yarn` commands
+- Commit `pnpm-lock.yaml` to ensure consistent installs
+
+## Node.js Version
+- Use Node.js 22.17.1 as specified in Volta configuration
+- Use pnpm 10.13.1 as specified in Volta configuration
+
+## Dependencies
+- Keep Mastra dependencies updated together (`@mastra/*`)
+- Use specific versions for AI SDK packages
+- Group related dependencies logically
+
+## Scripts
+- Add common development scripts to package.json
+- Use `tsx` for TypeScript execution during development
+- Leverage Zenn CLI for article management
+
+## Environment
+- Keep sensitive configuration in `.env` (not committed)
+- Use environment variables for API keys and external service URLs
+- Document required environment variables in README when needed

@@ -1,0 +1,27 @@
+# Zenn Article Guidelines
+
+## File Naming
+- Use the Zenn slug format for filenames
+- Include semantic prefixes when possible (e.g., `017_what-is-embedding-in-generative-ai.md`)
+
+## Content Structure
+- Start with proper frontmatter (title, emoji, type, topics, published)
+- Use clear, descriptive headings with proper hierarchy
+- Include code examples with proper syntax highlighting
+- Reference images from the `images/` directory
+
+## Technical Content
+- When writing about Mastra framework, reference actual implementation examples
+- Use code snippets from [src/mastra/](mdc:src/mastra/) when relevant
+- Explain concepts with practical examples
+- Include proper error handling in code examples
+
+## Zenn CLI Usage
+- Use `npx zenn preview` for local preview
+- Use `npx zenn new:article` for new articles
+- Validate articles before publishing
+
+## Images
+- Store images in `images/` directory
+- Use descriptive filenames matching article slugs
+- Reference images using relative paths in markdown
