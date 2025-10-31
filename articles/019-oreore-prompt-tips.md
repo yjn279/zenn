@@ -1,9 +1,10 @@
 ---
-title: ""
+title: "オレオレプロンプトTips"
 emoji: "😎"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [ai, chatgpt, claude, gemini]
-published: false
+published: true
+publication_name: "activecore"
 ---
 
 ## 背景
