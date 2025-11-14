@@ -4,9 +4,8 @@ emoji: "📚"
 type: "tech"
 topics:
   - "javascript"
-  - "gas"
   - "typescript"
-published: false
+published: true
 ---
 
 ## はじめに
