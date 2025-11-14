@@ -98,6 +98,29 @@ hoge(obj); //=> 'Yamada' 20
 
 JavaScriptやTypeScriptでは、オブジェクトを引数に渡しつつ分割代入を使うと「擬似的なキーワード引数」を表現できます。今回のような「特定の引数だけ上書きしたい」ケースでは素直にこの書き方を選ぶのが安全でした。
 
+## TypeScriptでの書き方
+
+今回の例はApps Script上でJavaScriptとして動かしていましたが、TypeScriptでも基本的な考え方は同じです。型を付けておくことで、呼び出し側で渡し忘れたプロパティをコンパイル時に検出できるようになります。
+
+```ts
+type HogeArgs = {
+  name: string;
+  age?: number;
+};
+
+function hoge({ name, age = -100 }: HogeArgs) {
+  console.log(name, age);
+}
+
+const obj: HogeArgs = { name: "Yamada", age: 20 };
+hoge(obj);
+
+hoge({ name: "Sato" });
+// hoge({ age: 10 }); //=> Property 'name' is missing in type ...
+```
+
+`age` をオプショナルにしつつデフォルト値を設定できるので、JavaScript版と同じ呼び出し方がそのまま使えます。`name` を必須にしたい場合はインターフェースで必須にしておけばよく、意図しない呼び出しを型チェックで防げます。
+
 ## おわりに
 
 代入式が値を返すこと自体は仕様どおりですが、「引数名を書く＝その引数へ代入する」ように錯覚してしまうとハマります。オブジェクトを受け取るインターフェースに揃えておくと、後から引数が増えても呼び出し側で柔軟に対応できるので一石二鳥でした。同じところで迷子になっている方のヒントになれば幸いです。
