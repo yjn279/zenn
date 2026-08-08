@@ -1,5 +1,5 @@
 ---
-title: "MintlifyでAI開発時代の認知負荷を下げよう"
+title: "Mintlifyでエージェント開発時代の認知負荷を下げる"
 emoji: "🌿"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics:
@@ -42,19 +42,19 @@ Mintlify は、ざっくり言うと Docs as Code、つまりドキュメント�
 
 実際、Mintlify 自身のドキュメントもこの方式で作られています。リポジトリを開いても、置かれているのはただの Markdown です。
 
-![リポジトリに置かれた Markdown](/images/022_reduce-cognitive-load-with-mintlify-01.png)
+![リポジトリに置かれた Markdown](/images/022_reduce-cognitive-load-in-agent-development-01.png)
 *mintlify/docs より引用 [^3]*
 
 この Markdown を HTML に変換するための設定も、同じリポジトリの中に置きます。`docs.json` に色やナビゲーションを書いておくと、それがそのままサイトの見た目になります。
 
-![表示設定を書いた docs.json](/images/022_reduce-cognitive-load-with-mintlify-02.png)
+![表示設定を書いた docs.json](/images/022_reduce-cognitive-load-in-agent-development-02.png)
 *mintlify/docs より引用 [^3]*
 
 つまり、中身も見た目も丸ごと Git の管理下に入る訳です。ブランチを切って直して、push すれば公開される。コードとまったく同じ道具立てで扱えるのが、この方式のいいところですね。
 
 そして、これらを Mintlify で表示するとこうなります。
 
-![Mintlify が表示したページ](/images/022_reduce-cognitive-load-with-mintlify-03.png)
+![Mintlify が表示したページ](/images/022_reduce-cognitive-load-in-agent-development-03.png)
 *Mintlify Documentation より引用 [^2]*
 
 中身は 1 文字も変わっていません。それでも、スタイルに色やメリハリがついて、左の目次でドキュメント体系が俯瞰できるだけで、読み始めるまでのハードルがまるで違います。
@@ -72,26 +72,20 @@ Mintlify は、ざっくり言うと Docs as Code、つまりドキュメント�
 
 要するに、AI に書かせるのも人間が受け取るのも、必要最低限かつ本質的な情報だけにしたい訳です。**AI は構造だけを書き、見た目は道具に任せる**。ここが一番好きなポイントで、この線引きさえ成り立てば道具は Mintlify でなくても構いません。
 
-## 仕様の追い方
+## PRレビューの代わりに
 
-いまは実装と一緒にドキュメントも更新させておいて、人間はそちらだけを読んでいます。差分は ~~見ない~~ 必要になったときだけ見ます。
+私の使い方としては、プロジェクトによっては Pull Request のレビューを一切せず、更新されたドキュメントだけを読んで仕様や実装を把握しています。差分は ~~見ない~~ 必要になったときだけ見ます。
 
-有料プランではブランチごとにプレビューを作れるので、Pull Request を開かなくても、そのブランチの仕様がひととおり分かります。無料プランでもローカルで起動でき、同じ Wi-Fi ならスマホから見に行けるのは地味にありがたいポイントですね。
+有料プランではブランチごとにプレビューを作れるので、Pull Request を開かなくても、そのブランチの仕様がひととおり把握できます。私は無料プランですが、家ではローカルでドキュメントサーバーを立てて（リポジトリ直下で `mint dev` を叩くだけです）、スマホでドキュメントを眺めながらレビューしています。とても楽なのでおすすめです😉
 
 ## おわりに
 
-正直、解説することはあまりないのですが、認知負荷の下げ方としてはかなり効いたので文章にしてみました。
+Mintlify に限らず、Docs as Code を提供するサービスは、エージェント開発時代とかなり噛み合わせがいいのではと感じています。
 
-発表のあとの雑談では、参加者から「見やすさよりも、ドキュメントを最新に保つ仕組みのほうが大事ですよね」という指摘をもらいました。まったくその通りで、中身が古ければ仕様として読む意味がありません。
+巷では HTML を直接生成させる方法もよく耳にしますが、個人的には前述のとおり、Markdown と HTML を使い分けるやり方のほうが流行ると予想しています。
 
-読みやすさと最新さ。この両方が揃ったときに、差分を追わない開発はようやく完成するのだと思います。ぜひ、手元のリポジトリで一度動かしてみてはいかがですか？😉
+四の五の言う前に、まずは手元のリポジトリで Docs as Code を試してみてください！
 
-## 参考
-
-- [Mintlify](https://mintlify.com)
-- [Mintlify Documentation](https://mintlify.com/docs)
-- [mintlify/docs: Official Mintlify documentation](https://github.com/mintlify/docs)
-
-[^1]: [yjn279/trinity: Harness for long-running tasks.](https://github.com/yjn279/trinity)
-[^2]: [Quickstart | Mintlify](https://mintlify.com/docs/quickstart)
-[^3]: [mintlify/docs](https://github.com/mintlify/docs)
+[^1]: [yjn279/trinity | GitHub](https://github.com/yjn279/trinity)
+[^2]: [Quick Start | Mintlify](https://mintlify.com/docs/quickstart)
+[^3]: [mintlify/docs | GitHub](https://github.com/mintlify/docs)
