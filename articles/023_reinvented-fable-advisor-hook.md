@@ -42,7 +42,7 @@ Claude Code に長時間の作業を任せていると、途中から目的と�
 | 制約 | Anthropic API のみ。Bedrock・AWS・Google Cloud・Microsoft Foundry では使えない |
 | 停止 | `/advisor off`、または `CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1` |
 
-つまり、視座を戻す問いを Fable に立てさせるという、このあと書く要求は、標準機能ですでに満たされていました。20 行、要らなかったんですよね。
+つまり、視座を戻す問いを Fable に立てさせるという、このあと書く要求は、標準機能ですでに満たされていました。24 行、要らなかったんですよね。
 
 それでも、自作した経緯と実測と仕様には残す価値があると考えたので、以下に供養します。
 
@@ -63,7 +63,7 @@ Claude Code に長時間の作業を任せていると、途中から目的と�
 
 | 項目 | PostToolBatch 版 | PostCompact 版 |
 | :-- | :-- | :-- |
-| 行数 | 74 行 | 20 行 |
+| 行数 | 74 行 | 24 行 |
 | 間隔の管理 | 30 分を自前で計測 | 不要（要約の発生に任せる） |
 | 入力 | 会話記録の末尾 80 行を解析 | `compact_summary` をそのまま使う |
 
@@ -87,7 +87,7 @@ claude --resume <session-id> --fork-session --settings probe.json -p "/compact"
 
 要するに、ドキュメントどおりに `transcript_path` を読む実装は動かず、かつ読む必要も最初からありません。実際に渡ってくるキーは `session_id` `transcript_path` `cwd` `prompt_id` `hook_event_name` `trigger` `compact_summary` の 7 つでした。
 
-## 中身は 20 行だけ
+## 中身は 24 行だけ
 
 `settings.json` にフックを登録します。
 
@@ -109,16 +109,20 @@ claude --resume <session-id> --fork-session --settings probe.json -p "/compact"
 }
 ```
 
-呼び出す実行ファイルの全文です。20 行しかありません。
+呼び出す実行ファイルの全文です。24 行しかありません。
 
 ```javascript: scripts/fable-advice/advise.mjs
 #!/usr/bin/env node
+// 会話が要約されたあと、その要約を Fable に読ませ、返ってきた問いかけを Claude へ渡す。
+// 長く一人で作業するうちに下がった視座を、目的まで引き上げるために置く。
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 
 const ROLE = `You are an executive coach.
 Based on the "summary", formulate a simple, abstract question that leads directly to the underlying objective. Output only the question.`;
 
+// 要約は対象者自身の言葉で書かれている。要約であることを囲んで示すことで、
+// 続きを書く側ではなく、外から問う側として読ませる。
 const summary = JSON.parse(fs.readFileSync(0, "utf8")).compact_summary;
 const asked = spawnSync(
   "claude",
@@ -204,13 +208,13 @@ flowchart LR
 | 入力 | 会話全体 | 要約のみ |
 | 出力 | 従うべき指針 | 問い 1 つ |
 | 動作環境 | Anthropic API のみ | `claude` が動けばどこでも |
-| 実装量 | 0 行 | 20 行 + 設定 |
+| 実装量 | 0 行 | 24 行 + 設定 |
 
 会話全体を読ませる advisor に対して、要約はすでに一段抽象化された情報です。断定はできませんが、俯瞰の問いを立てさせる用途には要約のほうが向いている可能性がある、という仮説だけ残しておきます。
 
 ## おわりに
 
-正直、解説することはあまりないのですが、advisor ツールを知らずに 20 行を書いてしまった記録として残しておきたくて、この記事を書きました。
+正直、解説することはあまりないのですが、advisor ツールを知らずに 24 行を書いてしまった記録として残しておきたくて、この記事を書きました。
 
 ドキュメントに書かれていない `PostCompact` の実挙動や、タグ・引数・プロンプトの効き目を 3 回ずつ試した数値は、advisor ツールが無くても手元に残ります。俯瞰の問いを自分で設計してみたい人には、まだ使い道があると思います。
 
