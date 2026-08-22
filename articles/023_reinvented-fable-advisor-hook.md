@@ -35,80 +35,23 @@ publication_name: "activecore"
 
 つまり、はじめに書いた「視座を戻す問いを Fable に立てさせる」という要求は、標準機能ですでに満たされていました。24 行、要らなかったんですよね。
 
-## 中身は 24 行だけ
+## 再発明した Hook について
 
-会話が要約された直後に発火する `PostCompact` に、`settings.json` でフックを登録します。
+会話が要約された直後に発火するフックです。Claude Code には、そのタイミングで呼び出せる `PostCompact` というフックがちょうど用意されていました。
 
-```json: settings.json
-{
-  "hooks": {
-    "PostCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$HOME/.claude/scripts/fable-advice/advise.mjs\"",
-            "timeout": 120
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-呼び出す実行ファイルの全文です。24 行しかありません。
-
-```javascript: scripts/fable-advice/advise.mjs
-#!/usr/bin/env node
-// 会話が要約されたあと、その要約を Fable に読ませ、返ってきた問いかけを Claude へ渡す。
-// 長く一人で作業するうちに下がった視座を、目的まで引き上げるために置く。
-import { spawnSync } from "node:child_process";
-import fs from "node:fs";
-
-const ROLE = `You are an executive coach.
-Based on the "summary", formulate a simple, abstract question that leads directly to the underlying objective. Output only the question.`;
-
-// 要約は対象者自身の言葉で書かれている。要約であることを囲んで示すことで、
-// 続きを書く側ではなく、外から問う側として読ませる。
-const summary = JSON.parse(fs.readFileSync(0, "utf8")).compact_summary;
-const asked = spawnSync(
-  "claude",
-  ["--print", "--safe-mode", "--no-session-persistence", "--model", "claude-fable-5", "--system-prompt", ROLE],
-  { input: `<summary>\n${summary}\n</summary>`, encoding: "utf8" },
-);
-
-if (asked.status !== 0) {
-  process.stderr.write(`Fable の呼び出しに失敗した: ${asked.error?.message ?? asked.stderr}\n`);
-  process.exit(1);
-}
-
-process.stdout.write(JSON.stringify({ additionalContext: asked.stdout.trim() }));
-```
-
-処理は「要約を渡す」「返事を渡す」の 2 つだけで、分岐は呼び出しの失敗 1 つです。フォールバックは置かず、Fable の呼び出しが失敗した場合はそのまま表面化させています。`PostCompact` は作業を止めないフックなので、ここで失敗しても作業自体は続きます。
-
-設置後の操作は不要です。会話が要約されるたびに自動で動きます。
+受け取った要約を Fable に読ませ、返ってきた問いを `additionalContext` として Claude の文脈へ渡します。流れを図にすると次のとおりです。
 
 ```mermaid
 flowchart LR
   work[作業] -->|文脈が膨らむ| compact[要約]
-  compact -->|compact_summary| hook[PostCompact フック]
-  hook -->|標準入力| fable[Fable]
-  fable -->|問い| hook
+  compact --> hook[PostCompact フック]
+  hook -->|要約を渡す| fable[Fable]
+  fable -->|問いを返す| hook
   hook -->|additionalContext| claude[Claude]
   claude --> work
 ```
 
-実際の要約（13,737 文字）を渡して 3 回実行したときの出力です。
-
-```plaintext
-「この設計が固まった」と言えるのは、何が満たされたときですか？
-そのルーブリックが本当に文体を捉えたと、何をもって確信しますか？
-設計が「固まった」と言えるのは、何がどうなったときですか？
-```
-
-役割は英語で与えていますが、答えは要約の言語に合わせて返ってきます。所要は 14 秒前後でした。実装はこの Pull Request にまとめてあります[^2]。
+実装の全文はこの Pull Request にまとめてあります[^2]。
 
 ## どう使い分けるか
 
