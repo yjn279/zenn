@@ -99,7 +99,7 @@ process.stdout.write(JSON.stringify({ additionalContext: asked.stdout.trim() }))
 
 処理は「要約を渡す」「返事を渡す」の 2 つだけで、分岐は呼び出しの失敗 1 つです。フォールバックは置かず、Fable の呼び出しが失敗した場合はそのまま表面化させています。`PostCompact` は作業を止めないフックなので、ここで失敗しても作業自体は続きます。
 
-設置後の操作は不要です。会話が要約されるたびに自動で動き、返ってきた問いが `additionalContext` として Claude の文脈へ入ります。
+設置後の操作は不要です。会話が要約されるたびに自動で動きます。
 
 ```mermaid
 flowchart LR
