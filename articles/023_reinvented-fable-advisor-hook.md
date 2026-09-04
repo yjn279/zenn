@@ -8,7 +8,7 @@ topics:
   - "hooks"
   - "ai"
   - "agent"
-published: true
+published: false
 published_at: "2026-08-24 12:00"
 publication_name: "activecore"
 ---
